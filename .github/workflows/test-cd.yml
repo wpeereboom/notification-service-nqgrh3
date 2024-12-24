@@ -1,0 +1,190 @@
+name: Test CD
+
+# Trigger on successful Test CI workflow completion or manual dispatch
+on:
+  workflow_run:
+    workflows: ["Test CI"]
+    types:
+      - completed
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+# Concurrency control to prevent parallel runs on same ref
+concurrency:
+  group: test-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+  APP_ENV: testing
+
+jobs:
+  # Deploy test environment
+  deploy-test-environment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_DB: notification_test
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      localstack:
+        image: localstack/localstack:latest
+        env:
+          SERVICES: sqs,sns,s3
+          DEFAULT_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+        ports:
+          - 4566:4566
+        options: >-
+          --health-cmd "curl -f http://localhost:4566/_localstack/health"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/test-deployment-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Amazon ECR
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.ECR_REGISTRY }}
+
+      - name: Build and push test images
+        run: |
+          docker-compose -f src/test/docker/docker-compose.test.yml build \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            --build-arg APP_ENV=testing
+          docker-compose -f src/test/docker/docker-compose.test.yml push
+
+  # Run test suites
+  run-test-suites:
+    needs: deploy-test-environment
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    env:
+      TEST_DB_HOST: localhost
+      TEST_REDIS_HOST: localhost
+      TEST_AWS_ENDPOINT: http://localhost:4566
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run integration tests
+        run: |
+          chmod +x src/test/Scripts/run_integration_tests.sh
+          ./src/test/Scripts/run_integration_tests.sh
+        env:
+          XDEBUG_MODE: coverage
+          APP_ENV: testing
+
+      - name: Run performance tests
+        run: |
+          chmod +x src/test/Scripts/run_performance_tests.sh
+          ./src/test/Scripts/run_performance_tests.sh
+        timeout-minutes: 30
+
+      - name: Run E2E tests
+        run: |
+          chmod +x src/test/Scripts/run_e2e_tests.sh
+          ./src/test/Scripts/run_e2e_tests.sh
+        timeout-minutes: 30
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            test-results/
+            performance-results/
+            e2e-results/
+          retention-days: 14
+
+  # Notify results
+  notify-results:
+    needs: run-test-suites
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { repo, owner } = context.repo;
+            const run_id = context.runId;
+            const run_url = `https://github.com/${owner}/${repo}/actions/runs/${run_id}`;
+            
+            await github.rest.issues.create({
+              owner,
+              repo,
+              title: `Test CD Failure - Run #${run_id}`,
+              body: `Test CD pipeline failed.\nSee details: ${run_url}`,
+              assignees: ['${{ github.repository_owner }}'],
+              labels: ['test-failure', 'needs-attention']
+            });
+
+      - name: Notify on success
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { repo, owner } = context.repo;
+            const run_id = context.runId;
+            const run_url = `https://github.com/${owner}/${repo}/actions/runs/${run_id}`;
+            
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: context.issue.number,
+              body: `✅ Test CD completed successfully.\nRun details: ${run_url}`
+            });
