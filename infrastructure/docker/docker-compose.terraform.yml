@@ -1,0 +1,114 @@
+version: "3.8"
+
+services:
+  terraform:
+    build:
+      context: .
+      dockerfile: Dockerfile.terraform
+      args:
+        TERRAFORM_VERSION: "1.5.0"
+        TERRAFORM_SHA256: "${TERRAFORM_SHA256}"
+    volumes:
+      # Mount Terraform configurations as read-only
+      - type: bind
+        source: ../terraform
+        target: /terraform
+        read_only: true
+      # Mount infrastructure scripts as read-only  
+      - type: bind
+        source: ../scripts
+        target: /scripts
+        read_only: true
+      # Mount AWS credentials with restricted permissions
+      - type: bind
+        source: ~/.aws
+        target: /root/.aws
+        read_only: true
+      # Mount logs directory with proper permissions
+      - type: volume
+        source: terraform_logs
+        target: /var/log
+      # Mount state backups
+      - type: volume
+        source: terraform_backups
+        target: /var/backup/terraform-state
+    environment:
+      # AWS Configuration
+      - AWS_REGION=us-east-1
+      - AWS_BACKUP_REGION=us-west-2
+      # Terraform Configuration
+      - TERRAFORM_VERSION=1.5.0
+      - STATE_BUCKET=notification-service-terraform-state
+      - BACKUP_STATE_BUCKET=notification-service-terraform-state-backup
+      - LOCK_TABLE=notification-service-terraform-locks
+      - BACKUP_LOCK_TABLE=notification-service-terraform-locks-backup
+      # Logging Configuration
+      - TF_LOG=INFO
+      - TF_LOG_PATH=/var/log/terraform.log
+      - TF_CLI_ARGS_plan="-parallelism=20"
+      - TF_CLI_ARGS_apply="-parallelism=20"
+      # Security Configuration
+      - TF_IN_AUTOMATION=true
+      - TF_INPUT=0
+    working_dir: /terraform
+    healthcheck:
+      test: ["CMD", "terraform", "version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        tag: "terraform-{{.Name}}"
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid
+    networks:
+      - terraform_net
+    restart: "no"
+
+networks:
+  terraform_net:
+    driver: bridge
+    internal: true
+    name: terraform_network
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  terraform_logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: /var/log/terraform
+      o: bind
+  terraform_backups:
+    driver: local
+    driver_opts:
+      type: none
+      device: /var/backup/terraform-state
+      o: bind
+
+x-deploy:
+  labels:
+    com.notification-service.environment: "infrastructure"
+    com.notification-service.component: "terraform"
+    com.notification-service.version: "1.0.0"
+  restart_policy:
+    condition: none
+  update_config:
+    parallelism: 1
+    delay: 10s
+    order: start-first
+    failure_action: rollback
+  rollback_config:
+    parallelism: 1
+    delay: 5s
+    failure_action: pause
