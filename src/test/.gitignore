@@ -1,0 +1,50 @@
+coverage/
+coverage.xml
+
+# Test Results
+test-results/
+.phpunit.result.cache
+.phpunit.cache/
+
+# Environment & Configuration
+.env
+test.env
+
+# Dependencies
+vendor/
+node_modules/
+
+# Temporary Files
+*.cache
+*.log
+*.sqlite
+temp/
+
+# Editor Files
+*.swp
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Generated Documentation
+testdox.html
+testdox.txt
+
+# Database
+test.db
+test.db-journal
+
+# Temporary Test Assets
+test-uploads/
+test-downloads/
+
+# Security-related
+*.pem
+*.key
+test-credentials.json
+
+# IDE-specific
+.idea/
+.vscode/
+*.sublime-workspace
