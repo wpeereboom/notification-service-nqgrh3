@@ -1,0 +1,74 @@
+# Terraform State Files
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfplan.*
+
+# Terraform Directory
+.terraform/
+.terraform.lock.hcl
+.terraformrc
+terraform.rc
+
+# Environment Variables & Local Settings
+*.tfvars
+*.tfvars.json
+.env
+.env.*
+local.tf
+local.*.tf
+
+# Terraform Overrides
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Credentials and Security Files
+.aws/
+credentials.json
+*.pem
+*.key
+*.keystore
+*.p12
+*.pfx
+*.crt
+*.cer
+secrets.yaml
+secrets.yml
+
+# Logs and Debug Files
+crash.log
+crash.*.log
+*.log
+logs/
+*.debug
+
+# Local System Files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*.bak
+*.backup
+tmp/
+temp/
+
+# Environment-specific Terraform Files
+terraform/environments/**/*.tfvars
+terraform/environments/**/*.tfstate*
+terraform/environments/**/.terraform/
+
+# Backup Files
+*.bak
+*~
+*.orig
+
+# Generated Files
+*.generated.tf
+*.generated.tfvars
+
+# Cache Files
+.terraform.tfstate.lock.info
+.terraform.cache/
