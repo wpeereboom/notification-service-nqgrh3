@@ -1,0 +1,148 @@
+name: Test CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: PHP Test Suite
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_DB: notification_test
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      localstack:
+        image: localstack/localstack:latest
+        env:
+          SERVICES: sqs,sns,s3
+          DEFAULT_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+        ports:
+          - 4566:4566
+        options: >-
+          --health-cmd "curl -f http://localhost:4566/_localstack/health"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      APP_ENV: testing
+      XDEBUG_MODE: coverage
+      TEST_DB_HOST: localhost
+      TEST_DB_PORT: 5432
+      TEST_DB_DATABASE: notification_test
+      TEST_DB_USERNAME: test_user
+      TEST_DB_PASSWORD: test_password
+      TEST_REDIS_HOST: localhost
+      TEST_REDIS_PORT: 6379
+      TEST_AWS_ENDPOINT: http://localhost:4566
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo, pgsql, redis, xdebug
+          coverage: xdebug
+          tools: composer:v2
+          ini-values: |
+            memory_limit=512M
+            error_reporting=E_ALL
+            display_errors=On
+            xdebug.mode=coverage
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Setup test environment
+        run: |
+          chmod +x src/test/Scripts/setup_test_env.sh
+          src/test/Scripts/setup_test_env.sh
+
+      - name: Run test suite
+        run: |
+          vendor/bin/phpunit \
+            --configuration src/test/Config/phpunit.xml \
+            --coverage-clover coverage.xml \
+            --coverage-html coverage-report \
+            --log-junit test-results/junit.xml \
+            --testdox-html test-results/testdox.html \
+            --testdox-text test-results/testdox.txt
+
+      - name: Verify 100% code coverage
+        run: |
+          if [ "$(grep -Po '(?<=percent\>)[^%]*' coverage.xml)" != "100" ]; then
+            echo "Code coverage is less than 100%"
+            exit 1
+          fi
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 7
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage-report/
+          retention-days: 7
+
+      - name: Notify on failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.name,
+              body: '❌ Tests failed. Please check the [test results](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).'
+            })
