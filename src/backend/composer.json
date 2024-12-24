@@ -1,0 +1,73 @@
+{
+    "name": "notification-service/backend",
+    "description": "High-throughput, multi-channel notification delivery system",
+    "type": "project",
+    "license": "proprietary",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.2",
+        "aws/aws-lambda-runtime": "^1.0",
+        "aws/aws-lambda-runtime-api": "^1.0",
+        "aws/aws-sdk-php": "^3.0",
+        "aws/aws-xray-sdk-php": "^3.0",
+        "circuit-breaker/circuit-breaker": "^2.0",
+        "doctrine/dbal": "^3.0",
+        "firebase/php-jwt": "^6.0",
+        "guzzlehttp/guzzle": "^7.0",
+        "illuminate/cache": "^10.0",
+        "illuminate/database": "^10.0",
+        "illuminate/foundation": "^9.0",
+        "illuminate/queue": "^10.0",
+        "illuminate/support": "^9.0",
+        "monolog/monolog": "^3.0",
+        "nesbot/carbon": "^2.0",
+        "predis/predis": "^2.0",
+        "psr/event-dispatcher": "^1.0",
+        "psr/log": "^3.0",
+        "ramsey/uuid": "^4.0",
+        "sendgrid/sendgrid": "^8.0",
+        "symfony/framework-bundle": "^6.0",
+        "symfony/messenger": "^6.0",
+        "telnyx/telnyx-php": "^2.0",
+        "twilio/sdk": "^7.0",
+        "ext-json": "*",
+        "ext-pdo": "*",
+        "ext-redis": "*"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.9",
+        "mockery/mockery": "^1.5",
+        "phpstan/phpstan": "^1.0",
+        "phpunit/phpunit": "^10.0",
+        "symfony/browser-kit": "^6.0",
+        "symfony/css-selector": "^6.0",
+        "symfony/phpunit-bridge": "^6.0",
+        "xdebug": "^3.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "NotificationService\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "NotificationService\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "platform": {
+            "php": "8.2"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "analyze": "phpstan analyze",
+        "post-install-cmd": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ]
+    }
+}
