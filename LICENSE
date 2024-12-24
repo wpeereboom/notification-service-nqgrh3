@@ -1,0 +1,114 @@
+ENTERPRISE NOTIFICATION SERVICE LICENSE AGREEMENT
+
+Copyright (c) 2023 Enterprise Notification Service
+All rights reserved.
+
+1. DEFINITIONS
+
+"Software" refers to the Enterprise Notification Service software and associated documentation.
+"Enterprise" refers to the licensed organization obtaining rights under this agreement.
+"Authorized Users" refers to enterprise employees and contractors granted access under this license.
+
+2. LICENSE GRANT
+
+Subject to the terms and conditions of this Agreement, Enterprise Notification Service grants Enterprise a non-exclusive, non-transferable license to use, modify, and deploy the Software within the Enterprise's internal business operations.
+
+3. COMMERCIAL USE REQUIREMENTS
+
+3.1. License Validation
+- Valid enterprise license required for all usage
+- License key validation through secure API
+- Usage tracking and compliance monitoring implemented
+- Annual license renewal with compliance review
+
+3.2. Deployment Requirements
+- Dedicated instance per enterprise required
+- Strict data isolation and multi-tenant compliance
+- Implementation of specified security controls
+- Adherence to performance SLAs
+
+4. MODIFICATIONS
+
+4.1. Authorized Modifications
+Enterprise may modify the Software provided that it:
+- Maintains all copyright notices and attributions
+- Documents all modifications in change log
+- Notifies vendor of substantial modifications
+- Complies with security requirements for code changes
+
+4.2. Prohibited Modifications
+The following modifications are strictly prohibited:
+- Removal of security features
+- Modification of audit trails
+- Alteration of licensing mechanisms
+
+5. DISTRIBUTION AND ACCESS
+
+5.1. Authorized Users
+- Limited to licensed enterprise employees and contractors
+- Verification through enterprise identity management
+- Defined access levels: Administrator, Developer, Operator, Auditor
+
+5.2. Distribution Limitations
+- Internal enterprise use only
+- No public distribution permitted
+- No transfer of license rights
+- No sublicensing without written approval
+
+6. SOURCE CODE MANAGEMENT
+
+6.1. Access Control
+- Limited to Enterprise Developers and Security Auditors
+- Secure repository access required
+- Code signing requirements must be met
+- Security review required for modifications
+
+6.2. Usage Restrictions
+- No public repositories
+- No unauthorized forks
+- Secure storage requirements must be met
+
+7. DATA HANDLING REQUIREMENTS
+
+7.1. Compliance Requirements
+- Data privacy compliance mandatory
+- Data residency requirements must be met
+- Encryption standards must be implemented
+- Retention policies must be followed
+
+8. WARRANTY DISCLAIMER
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+9. LIABILITY LIMITATIONS
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION).
+
+10. GOVERNING LAW
+
+This Agreement shall be governed by the jurisdiction specified in the enterprise agreement. All disputes shall be resolved through arbitration as per enterprise terms. Enterprise must comply with:
+- Local data protection laws
+- Industry regulations
+- Export control regulations
+
+11. CONTACT INFORMATION
+
+Legal Department:
+- Email: legal@enterprise-notification.com
+- Compliance Reporting: compliance@enterprise-notification.com
+- Security Issues: security@enterprise-notification.com
+- Response SLA: 24 hours for critical issues
+
+Violation Reporting:
+- Submit detailed reports to legal department including:
+  - Nature of violation
+  - Date and time
+  - Affected components
+  - Impact assessment
+- All reports treated as confidential
+
+12. TERM AND TERMINATION
+
+This license is effective until terminated. Enterprise Notification Service reserves the right to terminate this license for violation of any terms. Upon termination, Enterprise must cease all use of the Software and destroy all copies.
+
+By using the Software, Enterprise agrees to be bound by the terms of this license.
