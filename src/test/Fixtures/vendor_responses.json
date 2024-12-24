@@ -1,0 +1,303 @@
+{
+  "email": {
+    "iterable": {
+      "success": {
+        "messageId": "iter_msg_123456789",
+        "status": "sent",
+        "timestamp": "2023-10-15T08:30:45.123Z",
+        "performance": {
+          "processingTime": 45.67,
+          "queueTime": 12.34,
+          "totalLatency": 58.01
+        },
+        "response": {
+          "code": 200,
+          "data": {
+            "id": "iter_123456789",
+            "status": "sent",
+            "created_at": "2023-10-15T08:30:45.000Z",
+            "updated_at": "2023-10-15T08:30:45.123Z"
+          }
+        }
+      },
+      "error": {
+        "messageId": null,
+        "status": "failed",
+        "timestamp": "2023-10-15T08:30:46.234Z",
+        "performance": {
+          "processingTime": 23.45,
+          "queueTime": 11.22,
+          "totalLatency": 34.67
+        },
+        "response": {
+          "code": 400,
+          "error": "Invalid recipient email",
+          "details": "Email address format is invalid"
+        }
+      },
+      "rateLimit": {
+        "messageId": null,
+        "status": "rate_limited",
+        "timestamp": "2023-10-15T08:30:47.345Z",
+        "performance": {
+          "processingTime": 12.34,
+          "queueTime": 8.90,
+          "totalLatency": 21.24
+        },
+        "response": {
+          "code": 429,
+          "error": "Rate limit exceeded",
+          "retryAfter": 30
+        }
+      },
+      "healthCheck": {
+        "status": "healthy",
+        "timestamp": "2023-10-15T08:30:48.456Z",
+        "metrics": {
+          "currentThroughput": 35000,
+          "errorRate": 0.12,
+          "averageLatency": 58.45
+        }
+      }
+    },
+    "sendgrid": {
+      "success": {
+        "messageId": "sg_msg_987654321",
+        "status": "sent",
+        "timestamp": "2023-10-15T08:30:49.567Z",
+        "performance": {
+          "processingTime": 48.90,
+          "queueTime": 15.67,
+          "totalLatency": 64.57
+        },
+        "response": {
+          "code": 202,
+          "data": {
+            "id": "sg_987654321",
+            "status": "sent",
+            "created_at": "2023-10-15T08:30:49.000Z",
+            "updated_at": "2023-10-15T08:30:49.567Z"
+          }
+        }
+      },
+      "error": {
+        "messageId": null,
+        "status": "failed",
+        "timestamp": "2023-10-15T08:30:50.678Z",
+        "performance": {
+          "processingTime": 25.67,
+          "queueTime": 13.45,
+          "totalLatency": 39.12
+        },
+        "response": {
+          "code": 400,
+          "error": "Template rendering failed",
+          "details": "Missing required template variables"
+        }
+      },
+      "rateLimit": {
+        "messageId": null,
+        "status": "rate_limited",
+        "timestamp": "2023-10-15T08:30:51.789Z",
+        "performance": {
+          "processingTime": 11.23,
+          "queueTime": 9.87,
+          "totalLatency": 21.10
+        },
+        "response": {
+          "code": 429,
+          "error": "Rate limit exceeded",
+          "retryAfter": 60
+        }
+      },
+      "healthCheck": {
+        "status": "degraded",
+        "timestamp": "2023-10-15T08:30:52.890Z",
+        "metrics": {
+          "currentThroughput": 28000,
+          "errorRate": 2.45,
+          "averageLatency": 64.78
+        }
+      }
+    },
+    "ses": {
+      "success": {
+        "messageId": "ses_msg_456789123",
+        "status": "sent",
+        "timestamp": "2023-10-15T08:30:53.901Z",
+        "performance": {
+          "processingTime": 42.34,
+          "queueTime": 11.78,
+          "totalLatency": 54.12
+        },
+        "response": {
+          "code": 200,
+          "data": {
+            "MessageId": "ses_456789123",
+            "Status": "Success"
+          }
+        }
+      },
+      "error": {
+        "messageId": null,
+        "status": "failed",
+        "timestamp": "2023-10-15T08:30:54.012Z",
+        "performance": {
+          "processingTime": 21.90,
+          "queueTime": 12.45,
+          "totalLatency": 34.35
+        },
+        "response": {
+          "code": 400,
+          "error": "MessageRejected",
+          "details": "Email address is blacklisted"
+        }
+      },
+      "healthCheck": {
+        "status": "healthy",
+        "timestamp": "2023-10-15T08:30:55.123Z",
+        "metrics": {
+          "currentThroughput": 42000,
+          "errorRate": 0.08,
+          "averageLatency": 54.23
+        }
+      }
+    }
+  },
+  "sms": {
+    "telnyx": {
+      "success": {
+        "messageId": "tlx_msg_234567891",
+        "status": "sent",
+        "timestamp": "2023-10-15T08:30:56.234Z",
+        "performance": {
+          "processingTime": 38.90,
+          "queueTime": 10.45,
+          "totalLatency": 49.35
+        },
+        "response": {
+          "code": 200,
+          "data": {
+            "id": "tlx_234567891",
+            "status": "sent",
+            "to": "+1234567890",
+            "completed_at": "2023-10-15T08:30:56.234Z"
+          }
+        }
+      },
+      "error": {
+        "messageId": null,
+        "status": "failed",
+        "timestamp": "2023-10-15T08:30:57.345Z",
+        "performance": {
+          "processingTime": 24.56,
+          "queueTime": 11.23,
+          "totalLatency": 35.79
+        },
+        "response": {
+          "code": 400,
+          "error": "Invalid phone number",
+          "details": "Phone number format is invalid"
+        }
+      },
+      "healthCheck": {
+        "status": "healthy",
+        "timestamp": "2023-10-15T08:30:58.456Z",
+        "metrics": {
+          "currentThroughput": 25000,
+          "errorRate": 0.15,
+          "averageLatency": 49.67
+        }
+      }
+    },
+    "twilio": {
+      "success": {
+        "messageId": "tw_msg_345678912",
+        "status": "sent",
+        "timestamp": "2023-10-15T08:30:59.567Z",
+        "performance": {
+          "processingTime": 41.23,
+          "queueTime": 13.45,
+          "totalLatency": 54.68
+        },
+        "response": {
+          "code": 201,
+          "data": {
+            "sid": "tw_345678912",
+            "status": "sent",
+            "dateCreated": "2023-10-15T08:30:59.567Z"
+          }
+        }
+      },
+      "error": {
+        "messageId": null,
+        "status": "failed",
+        "timestamp": "2023-10-15T08:31:00.678Z",
+        "performance": {
+          "processingTime": 26.78,
+          "queueTime": 12.34,
+          "totalLatency": 39.12
+        },
+        "response": {
+          "code": 400,
+          "error": "Geographic Permission",
+          "details": "SMS sending to this region is not allowed"
+        }
+      },
+      "healthCheck": {
+        "status": "healthy",
+        "timestamp": "2023-10-15T08:31:01.789Z",
+        "metrics": {
+          "currentThroughput": 22000,
+          "errorRate": 0.18,
+          "averageLatency": 54.89
+        }
+      }
+    }
+  },
+  "push": {
+    "sns": {
+      "success": {
+        "messageId": "sns_msg_567891234",
+        "status": "sent",
+        "timestamp": "2023-10-15T08:31:02.890Z",
+        "performance": {
+          "processingTime": 35.67,
+          "queueTime": 9.89,
+          "totalLatency": 45.56
+        },
+        "response": {
+          "code": 200,
+          "data": {
+            "MessageId": "sns_567891234",
+            "SequenceNumber": "123456789"
+          }
+        }
+      },
+      "error": {
+        "messageId": null,
+        "status": "failed",
+        "timestamp": "2023-10-15T08:31:03.901Z",
+        "performance": {
+          "processingTime": 22.34,
+          "queueTime": 10.67,
+          "totalLatency": 33.01
+        },
+        "response": {
+          "code": 400,
+          "error": "EndpointDisabled",
+          "details": "Push notification endpoint is no longer valid"
+        }
+      },
+      "healthCheck": {
+        "status": "healthy",
+        "timestamp": "2023-10-15T08:31:04.012Z",
+        "metrics": {
+          "currentThroughput": 45000,
+          "errorRate": 0.05,
+          "averageLatency": 45.78
+        }
+      }
+    }
+  }
+}
