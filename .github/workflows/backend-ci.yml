@@ -1,0 +1,120 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  # version comment: actions/checkout@v3
+  # version comment: shivammathur/setup-php@v2
+  # version comment: ramsey/composer-install@v2
+  # version comment: codecov/codecov-action@v3
+  
+  APP_ENV: testing
+  DB_CONNECTION: pgsql
+  DB_HOST: localhost
+  DB_DATABASE: notification_service_test
+  REDIS_HOST: localhost
+
+jobs:
+  tests:
+    name: Run Tests & Analysis
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/backend
+
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_DB: notification_service_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: json, pdo, pdo_pgsql, redis
+          coverage: xdebug
+          tools: composer:v2, phpstan, phpunit
+          ini-values: memory_limit=-1
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        uses: ramsey/composer-install@v2
+        with:
+          composer-options: "--prefer-dist --no-interaction"
+
+      - name: Run static analysis
+        run: vendor/bin/phpstan analyze --level=max src tests
+
+      - name: Run PHP Code Sniffer
+        run: vendor/bin/phpcs --standard=PSR12 src tests
+
+      - name: Run security check
+        run: composer audit
+
+      - name: Run tests with coverage
+        run: |
+          vendor/bin/phpunit --coverage-clover coverage.xml \
+            --coverage-html coverage \
+            --log-junit test-report.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: coverage.xml
+          fail_ci_if_error: true
+          verbose: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            src/backend/coverage/
+            src/backend/test-report.xml
+
+      - name: Check test coverage threshold
+        run: |
+          COVERAGE=$(grep -Po '(?<=percent\>)[^<]+' coverage.xml | head -1)
+          if (( $(echo "$COVERAGE < 100" | bc -l) )); then
+            echo "Test coverage ($COVERAGE%) is below required 100%"
+            exit 1
+          fi
