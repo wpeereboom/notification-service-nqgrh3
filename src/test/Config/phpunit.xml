@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PHPUnit configuration for Notification Service Testing -->
+<!-- PHPUnit ^10.0 -->
+<!-- Xdebug ^3.2 -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.0/phpunit.xsd"
+         bootstrap="../vendor/autoload.php"
+         colors="true"
+         stopOnFailure="false"
+         processIsolation="true"
+         backupGlobals="false"
+         backupStaticAttributes="false"
+         testdox="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         verbose="true"
+         cacheDirectory=".phpunit.cache">
+
+    <!-- Test Suites Configuration -->
+    <testsuites>
+        <testsuite name="Integration">
+            <directory>Integration</directory>
+        </testsuite>
+        <testsuite name="Performance">
+            <directory>Performance</directory>
+        </testsuite>
+        <testsuite name="E2E">
+            <directory>E2E</directory>
+        </testsuite>
+    </testsuites>
+
+    <!-- Code Coverage Configuration -->
+    <coverage>
+        <include>
+            <directory suffix=".php">../backend/src</directory>
+        </include>
+        <exclude>
+            <directory suffix=".php">../backend/src/Exceptions</directory>
+            <directory suffix=".php">../backend/src/Providers</directory>
+        </exclude>
+        <report>
+            <html outputDirectory="coverage"/>
+            <clover outputFile="coverage.xml"/>
+            <text outputFile="coverage.txt"/>
+        </report>
+        <requirements>
+            <lines value="100"/>
+            <methods value="100"/>
+            <classes value="100"/>
+        </requirements>
+    </coverage>
+
+    <!-- PHP Settings -->
+    <php>
+        <!-- Environment Variables -->
+        <env name="XDEBUG_MODE" value="coverage"/>
+        <env name="APP_ENV" value="testing"/>
+        <env name="TEST_CACHE_HOST" value="redis"/>
+        <env name="TEST_DB_HOST" value="postgres"/>
+        <env name="TEST_QUEUE_URL" value="http://localstack:4566/queue/test"/>
+        
+        <!-- PHP Configuration -->
+        <ini name="display_errors" value="true"/>
+        <ini name="error_reporting" value="E_ALL"/>
+        <ini name="memory_limit" value="1G"/>
+        <ini name="max_execution_time" value="600"/>
+    </php>
+
+    <!-- Logging Configuration -->
+    <logging>
+        <junit outputFile="test-results/junit.xml"/>
+        <testdoxHtml outputFile="test-results/testdox.html"/>
+        <testdoxText outputFile="test-results/testdox.txt"/>
+    </logging>
+
+    <!-- Listeners for Test Execution -->
+    <listeners>
+        <listener class="PHPUnit\Util\Printer" file="vendor/phpunit/phpunit/src/Util/Printer.php"/>
+    </listeners>
+
+    <!-- Extensions Configuration -->
+    <extensions>
+        <extension class="PHPUnit\Runner\Extension\ExtensionHandler"/>
+    </extensions>
+</phpunit>
