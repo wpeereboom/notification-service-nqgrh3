@@ -1,0 +1,181 @@
+#!/usr/bin/env node
+
+/**
+ * Notification Service CLI
+ * Enterprise-grade command-line interface for managing notifications, templates, and vendors
+ * with enhanced accessibility and internationalization support.
+ * @packageDocumentation
+ * @version 1.0.0
+ */
+
+import yargs from 'yargs'; // v17.0.0
+import dotenv from 'dotenv'; // v16.0.0
+import i18next from 'i18next'; // v21.0.0
+import { hideBin } from 'yargs/helpers';
+import { join } from 'path';
+
+// Import commands
+import { NotifyCommand } from '../src/Cli/Commands/NotifyCommand';
+import { StatusCommand } from '../src/Cli/Commands/StatusCommand';
+import { TemplateCommand } from '../src/Cli/Commands/TemplateCommand';
+import { VendorCommand } from '../src/Cli/Commands/VendorCommand';
+
+// Import services
+import { ApiService } from '../src/Cli/Services/ApiService';
+import { OutputService } from '../src/Cli/Services/OutputService';
+import { ConfigService } from '../src/Cli/Services/ConfigService';
+
+// Import types
+import { OutputFormat, ErrorLevel } from '../src/Cli/Types';
+
+// Constants
+const DEFAULT_CONFIG_PATH = join(process.env.HOME || process.env.USERPROFILE || '', '.notify');
+const VERSION = '1.0.0';
+
+/**
+ * Main CLI application entry point with enhanced error handling and accessibility
+ */
+async function main(): Promise<void> {
+  try {
+    // Load environment configuration
+    dotenv.config();
+
+    // Initialize configuration service
+    const configService = new ConfigService(DEFAULT_CONFIG_PATH);
+    await configService.loadConfig();
+
+    // Initialize i18n support
+    await i18next.init({
+      lng: process.env.NOTIFY_LANG || 'en',
+      fallbackLng: 'en',
+      debug: process.env.NODE_ENV === 'development',
+      resources: {
+        en: {
+          translation: require('../locales/en.json')
+        }
+      }
+    });
+
+    // Initialize services
+    const apiService = new ApiService(configService);
+    const outputService = new OutputService(
+      configService.getConfig<OutputFormat>('format'),
+      configService.getConfig<boolean>('verbose'),
+      process.env.NOTIFY_RTL === 'true'
+    );
+
+    // Set up global error handler
+    process.on('unhandledRejection', (error: Error) => {
+      outputService.error(
+        'UNHANDLED_REJECTION',
+        `Unhandled promise rejection: ${error.message}`
+      );
+      process.exit(1);
+    });
+
+    process.on('uncaughtException', (error: Error) => {
+      outputService.error(
+        'UNCAUGHT_EXCEPTION',
+        `Uncaught exception: ${error.message}`
+      );
+      process.exit(1);
+    });
+
+    // Initialize commands
+    const commands = [
+      new NotifyCommand(apiService, outputService),
+      new StatusCommand(apiService, outputService),
+      new TemplateCommand(apiService, outputService),
+      new VendorCommand(apiService, outputService)
+    ];
+
+    // Configure CLI parser
+    const cli = yargs(hideBin(process.argv))
+      .scriptName('notify')
+      .version(VERSION)
+      .usage('Usage: $0 <command> [options]')
+      .strict()
+      .wrap(120)
+      .showHelpOnFail(true)
+      .alias('h', 'help')
+      .alias('v', 'version')
+      .option('verbose', {
+        type: 'boolean',
+        description: 'Enable verbose output',
+        global: true
+      })
+      .option('format', {
+        choices: Object.values(OutputFormat),
+        default: OutputFormat.TABLE,
+        description: 'Output format',
+        global: true
+      })
+      .option('config', {
+        type: 'string',
+        description: 'Path to config file',
+        global: true
+      });
+
+    // Register commands
+    for (const command of commands) {
+      cli.command({
+        command: command.name,
+        aliases: command.aliases,
+        describe: command.description,
+        builder: (yargs) => {
+          return yargs.help().version(false);
+        },
+        handler: async (argv) => {
+          try {
+            await command.execute(argv._ as string[], argv);
+          } catch (error) {
+            outputService.error(
+              'COMMAND_ERROR',
+              `Command execution failed: ${(error as Error).message}`
+            );
+            process.exit(1);
+          }
+        }
+      });
+    }
+
+    // Add command suggestions for typos
+    cli.recommendCommands()
+      .fail((msg, err, yargs) => {
+        if (err) {
+          outputService.error('CLI_ERROR', err.message);
+        } else {
+          outputService.error('USAGE_ERROR', msg);
+          console.log('\n' + yargs.help());
+        }
+        process.exit(1);
+      });
+
+    // Parse arguments
+    await cli.parse();
+
+  } catch (error) {
+    console.error(chalk.red(`Fatal error: ${(error as Error).message}`));
+    process.exit(1);
+  }
+}
+
+// Execute main function
+main().catch((error) => {
+  console.error(chalk.red(`Bootstrap error: ${error.message}`));
+  process.exit(1);
+});
+
+// Handle cleanup on exit
+process.on('exit', () => {
+  // Cleanup resources
+});
+
+// Handle termination signals
+process.on('SIGINT', () => {
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  process.exit(0);
+});
