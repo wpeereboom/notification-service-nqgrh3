@@ -1,0 +1,206 @@
+{
+  "notifications": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "type": "welcome",
+      "channel": "email",
+      "status": "delivered",
+      "template_id": "template-001",
+      "payload": {
+        "recipient": "user@example.com",
+        "context": {
+          "name": "John Doe",
+          "company": "Acme Corp"
+        },
+        "metadata": {
+          "campaign_id": "welcome-2023",
+          "priority": "high"
+        }
+      },
+      "created_at": "2023-10-01T10:00:00Z",
+      "updated_at": "2023-10-01T10:00:05Z",
+      "delivery_attempts": [
+        {
+          "vendor": "iterable",
+          "status": "successful",
+          "attempted_at": "2023-10-01T10:00:03Z",
+          "response": {
+            "message_id": "msg_123",
+            "status": "sent"
+          }
+        }
+      ],
+      "vendor_metadata": {
+        "message_id": "msg_123",
+        "tracking_enabled": true
+      },
+      "processing_metadata": {
+        "processing_time_ms": 234,
+        "queue_time_ms": 45
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440001",
+      "type": "password_reset",
+      "channel": "email",
+      "status": "delivered",
+      "template_id": "template-002",
+      "payload": {
+        "recipient": "user2@example.com",
+        "context": {
+          "reset_link": "https://example.com/reset/token123",
+          "expiry_hours": 24
+        },
+        "metadata": {
+          "priority": "high",
+          "security_level": "high"
+        }
+      },
+      "created_at": "2023-10-01T10:15:00Z",
+      "updated_at": "2023-10-01T10:15:08Z",
+      "delivery_attempts": [
+        {
+          "vendor": "iterable",
+          "status": "failed",
+          "attempted_at": "2023-10-01T10:15:03Z",
+          "response": {
+            "error": "rate_limit_exceeded",
+            "message": "Too many requests"
+          }
+        },
+        {
+          "vendor": "sendgrid",
+          "status": "successful",
+          "attempted_at": "2023-10-01T10:15:06Z",
+          "response": {
+            "message_id": "msg_456",
+            "status": "delivered"
+          }
+        }
+      ],
+      "vendor_metadata": {
+        "message_id": "msg_456",
+        "tracking_enabled": true
+      },
+      "processing_metadata": {
+        "processing_time_ms": 567,
+        "queue_time_ms": 89,
+        "retry_count": 1
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440002",
+      "type": "security_alert",
+      "channel": "sms",
+      "status": "delivered",
+      "template_id": "template-003",
+      "payload": {
+        "recipient": "+1234567890",
+        "context": {
+          "location": "San Francisco",
+          "device": "iPhone 12",
+          "time": "10:30 AM PST"
+        },
+        "metadata": {
+          "priority": "high",
+          "security_level": "high"
+        }
+      },
+      "created_at": "2023-10-01T10:30:00Z",
+      "updated_at": "2023-10-01T10:30:04Z",
+      "delivery_attempts": [
+        {
+          "vendor": "telnyx",
+          "status": "successful",
+          "attempted_at": "2023-10-01T10:30:02Z",
+          "response": {
+            "message_id": "sms_789",
+            "status": "delivered"
+          }
+        }
+      ],
+      "vendor_metadata": {
+        "message_id": "sms_789",
+        "delivery_status": "confirmed"
+      },
+      "processing_metadata": {
+        "processing_time_ms": 123,
+        "queue_time_ms": 34
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440003",
+      "type": "marketing",
+      "channel": "push",
+      "status": "failed",
+      "template_id": "template-004",
+      "payload": {
+        "recipient": "device_token_123",
+        "context": {
+          "title": "Flash Sale!",
+          "body": "50% off all items",
+          "deep_link": "app://products/sale"
+        },
+        "metadata": {
+          "campaign_id": "summer_sale_2023",
+          "priority": "normal"
+        }
+      },
+      "created_at": "2023-10-01T11:00:00Z",
+      "updated_at": "2023-10-01T11:00:10Z",
+      "delivery_attempts": [
+        {
+          "vendor": "sns",
+          "status": "failed",
+          "attempted_at": "2023-10-01T11:00:05Z",
+          "response": {
+            "error": "InvalidToken",
+            "message": "Device token is no longer valid"
+          }
+        }
+      ],
+      "vendor_metadata": {
+        "platform": "ios",
+        "app_version": "2.1.0"
+      },
+      "processing_metadata": {
+        "processing_time_ms": 345,
+        "queue_time_ms": 56,
+        "error_code": "INVALID_TOKEN"
+      }
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440004",
+      "type": "batch",
+      "channel": "email",
+      "status": "processing",
+      "template_id": "template-005",
+      "payload": {
+        "recipient": "user3@example.com",
+        "context": {
+          "products": [
+            {"name": "Product A", "price": 99.99},
+            {"name": "Product B", "price": 149.99}
+          ],
+          "total_items": 2
+        },
+        "metadata": {
+          "batch_id": "batch_123",
+          "priority": "low"
+        }
+      },
+      "created_at": "2023-10-01T12:00:00Z",
+      "updated_at": "2023-10-01T12:00:02Z",
+      "delivery_attempts": [],
+      "vendor_metadata": {
+        "batch_size": 1000,
+        "current_position": 450
+      },
+      "processing_metadata": {
+        "processing_time_ms": 0,
+        "queue_time_ms": 120,
+        "batch_progress": 0.45
+      }
+    }
+  ]
+}
