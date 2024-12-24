@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  # PHP Application Service
+  app:
+    image: php:8.2-fpm-alpine
+    container_name: notification_service_app
+    volumes:
+      - .:/var/www/html
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=notification_service
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - notification_network
+    healthcheck:
+      test: ["CMD", "php", "-v"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PostgreSQL Database Service
+  postgres:
+    image: postgres:14-alpine
+    container_name: notification_service_db
+    environment:
+      - POSTGRES_DB=notification_service
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_INITDB_ARGS=--data-checksums
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - notification_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache Service
+  redis:
+    image: redis:7-alpine
+    container_name: notification_service_cache
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - notification_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    name: notification_service_postgres_data
+  redis_data:
+    name: notification_service_redis_data
+
+networks:
+  notification_network:
+    name: notification_service_network
+    driver: bridge
