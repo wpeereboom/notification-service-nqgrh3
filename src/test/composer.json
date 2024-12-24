@@ -1,0 +1,67 @@
+{
+    "name": "notification-service/test",
+    "description": "Test suite for the notification service",
+    "type": "project",
+    "license": "proprietary",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.2",
+        "ext-json": "*",
+        "ext-pdo": "*",
+        "aws/aws-sdk-php": "^3.0",
+        "monolog/monolog": "^3.0",
+        "nesbot/carbon": "^2.0",
+        "predis/predis": "^2.0",
+        "psr/log": "^3.0",
+        "swoole/swoole": "^5.0",
+        "symfony/console": "^6.0"
+    },
+    "require-dev": {
+        "@types/jest": "^29.5.0",
+        "@types/k6": "^0.45.0",
+        "fakerphp/faker": "^1.23",
+        "jest": "^29.5.0",
+        "k6": "^0.45",
+        "mockery/mockery": "^1.6",
+        "phpunit/phpunit": "^10.0",
+        "symfony/browser-kit": "^6.0",
+        "symfony/phpunit-bridge": "^6.0",
+        "symfony/stopwatch": "^6.0",
+        "ts-jest": "^29.0.5",
+        "typescript": "^4.9.5",
+        "xdebug": "^3.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "NotificationService\\Test\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "NotificationService\\Test\\Unit\\": "tests/Unit/",
+            "NotificationService\\Test\\Integration\\": "tests/Integration/",
+            "NotificationService\\Test\\E2E\\": "tests/E2E/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "platform": {
+            "php": "8.2"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:unit": "phpunit --testsuite Unit",
+        "test:integration": "phpunit --testsuite Integration",
+        "test:e2e": "phpunit --testsuite E2E",
+        "test:performance": "k6 run Performance/LoadTest/*.js",
+        "test:all": [
+            "@test:unit",
+            "@test:integration",
+            "@test:e2e",
+            "@test:performance"
+        ]
+    }
+}
