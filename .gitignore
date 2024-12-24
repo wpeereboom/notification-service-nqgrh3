@@ -1,0 +1,122 @@
+# Dependencies
+**/node_modules/
+**/vendor/
+composer.lock
+package-lock.json
+yarn.lock
+
+# Environment files
+.env
+.env.local
+.env.*.local
+**/*.env
+
+# Build and distribution
+**/dist/
+**/build/
+**/*.js.map
+public/storage
+public/hot
+.aws-sam/
+
+# Cache and logs
+**/var/cache/
+**/var/log/
+**/*.log
+**/*.cache
+.phpunit.result.cache
+*.php.cs.cache
+.php_cs
+crash.log
+crash.*.log
+
+# Test artifacts
+**/coverage/
+**/test-results/
+coverage.xml
+**/*.sqlite
+.phpunit.result.cache
+
+# Infrastructure
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json
+.terraform.lock.hcl
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+samconfig.toml
+
+# Credentials and keys
+.aws/
+credentials.json
+*.pem
+*.key
+storage/*.key
+
+# IDE and editor
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+*~
+
+# Temporary files
+**/temp/
+**/tmp/
+
+# PHP specific
+*.php.cs.cache
+.php_cs
+.php_cs.dist
+
+# AWS specific
+.aws-sam/
+samconfig.toml
+
+# Cache directories
+var/cache/
+var/log/
+var/sessions/
+
+# Composer specific
+auth.json
+
+# Test specific
+.phpunit.cache/
+.phpunit.result.cache
+phpunit.xml.bak
+
+# Local development
+docker-compose.override.yml
+docker-compose.*.yml
+!docker-compose.yml
+
+# Generated documentation
+/docs/api/
+/docs/coverage/
+/docs/phpunit/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Local configuration overrides
+config.local.php
+*.local.yml
+*.local.yaml
+
+# Debug files
+*.debug
+debug.log
