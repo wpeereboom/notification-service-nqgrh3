@@ -1,0 +1,34 @@
+# Each line is a file pattern followed by one or more owners.
+# Order is important - the last matching pattern takes precedence.
+
+# Root Configuration Files
+# All root level configuration files require core team review
+/* @core-team
+
+# Backend Services
+# Service implementations require backend team and service reviewers
+/src/backend/src/Services/** @backend-team @service-reviewers
+# Service contracts and interfaces require backend and architecture teams
+/src/backend/src/Contracts/** @backend-team @architecture-team
+
+# Infrastructure Configuration
+# Terraform and infrastructure files require DevOps and infrastructure reviewer approval
+/infrastructure/terraform/** @devops-team @infrastructure-reviewers
+
+# Security Components
+# Authentication and authorization services require security and backend team review
+/src/backend/src/Services/Auth/** @security-team @backend-team
+# Encryption utilities require security team review
+/src/backend/src/Utils/Encryption.php @security-team
+
+# Testing
+# Test suites and configurations require QA and test automation team review
+/src/test/** @qa-team @test-automation-team
+
+# CI/CD Configuration
+# GitHub Actions workflows require DevOps and CI/CD reviewer approval
+/.github/workflows/** @devops-team @ci-cd-reviewers
+
+# Documentation
+# All documentation files require docs team and technical writer review
+/**/*.md @docs-team @technical-writers
