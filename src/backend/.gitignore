@@ -1,0 +1,84 @@
+# Dependencies
+/vendor/
+/node_modules/
+composer.lock
+package-lock.json
+yarn.lock
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.backup
+.env.development
+.env.testing
+.env.production
+
+# Build artifacts
+/dist/
+/build/
+*.js.map
+*.css.map
+/public/hot
+/public/storage
+
+# Cache and logs
+/var/cache/*
+/var/log/*
+/storage/*.key
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+*.cache
+*.log
+
+# IDE and editor files
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+.project
+.settings/
+*.swp
+*.swo
+*~
+.*.kate-swp
+
+# Testing artifacts
+.phpunit.result.cache
+.phpunit.cache
+coverage/
+coverage.xml
+phpunit.xml
+tests/coverage/*
+
+# System files
+.DS_Store
+Thumbs.db
+*.bak
+*.tmp
+
+# Temporary files
+*.swp
+*.swo
+*~
+.#*
+#*#
+
+# Security sensitive files
+*.pem
+*.key
+*.crt
+*.csr
+auth.json
+
+# Keep these directories but ignore their contents
+!.gitkeep
+!public/.gitkeep
+!storage/.gitkeep
+!storage/framework/.gitkeep
+!storage/framework/cache/.gitkeep
+!storage/framework/sessions/.gitkeep
+!storage/framework/views/.gitkeep
+!storage/logs/.gitkeep
