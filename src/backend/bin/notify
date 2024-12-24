@@ -1,0 +1,259 @@
+#!/usr/bin/env node
+
+/**
+ * Notification Service CLI
+ * Enterprise-grade command-line interface for managing notifications
+ * with comprehensive accessibility and internationalization support
+ * 
+ * @version 1.0.0
+ * @license MIT
+ */
+
+import yargs from 'yargs'; // v17.7.2
+import chalk from 'chalk'; // v4.1.2
+import { NotifyCommand } from '../src/Cli/Commands/NotifyCommand';
+import { StatusCommand } from '../src/Cli/Commands/StatusCommand';
+import { TemplateCommand } from '../src/Cli/Commands/TemplateCommand';
+import { ApiService } from '../src/Cli/Services/ApiService';
+import { OutputService } from '../src/Cli/Services/OutputService';
+import { OutputFormat, NotificationChannel } from '../src/Cli/Types';
+
+// Telemetry decorator for command tracking
+function telemetry(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  const originalMethod = descriptor.value;
+  descriptor.value = async function (...args: any[]) {
+    const startTime = process.hrtime();
+    try {
+      return await originalMethod.apply(this, args);
+    } finally {
+      const [seconds, nanoseconds] = process.hrtime(startTime);
+      if (process.env.TELEMETRY_ENABLED === 'true') {
+        console.debug(`Command execution time: ${seconds}s ${nanoseconds / 1000000}ms`);
+      }
+    }
+  };
+  return descriptor;
+}
+
+// Error boundary decorator for global error handling
+function errorBoundary(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  const originalMethod = descriptor.value;
+  descriptor.value = async function (...args: any[]) {
+    try {
+      return await originalMethod.apply(this, args);
+    } catch (error) {
+      console.error(chalk.red('Fatal Error:'), error);
+      process.exit(1);
+    }
+  };
+  return descriptor;
+}
+
+class NotificationCLI {
+  private readonly outputService: OutputService;
+  private readonly apiService: ApiService;
+  private readonly commands: Map<string, any>;
+
+  constructor() {
+    // Initialize services with proper configuration
+    this.outputService = new OutputService(
+      OutputFormat.TABLE,
+      process.env.NODE_ENV === 'development',
+      process.env.LANG?.startsWith('ar') || false // RTL support
+    );
+
+    this.apiService = new ApiService({
+      getConfig: (key: string) => {
+        switch (key) {
+          case 'apiUrl': return process.env.API_URL || 'http://localhost:3000';
+          case 'apiKey': return process.env.API_KEY || '';
+          case 'timeout': return parseInt(process.env.API_TIMEOUT || '5000');
+          default: return undefined;
+        }
+      }
+    });
+
+    // Initialize command handlers
+    this.commands = new Map([
+      ['notify', new NotifyCommand(this.apiService, this.outputService)],
+      ['status', new StatusCommand(this.apiService, this.outputService)],
+      ['template', new TemplateCommand(this.apiService, this.outputService)]
+    ]);
+  }
+
+  /**
+   * Main CLI entry point with comprehensive error handling
+   * and accessibility support
+   */
+  @telemetry
+  @errorBoundary
+  public async main(): Promise<void> {
+    // Register signal handlers for graceful shutdown
+    this.registerSignalHandlers();
+
+    // Configure and execute yargs
+    const argv = await yargs
+      .scriptName('notify')
+      .usage('Usage: $0 <command> [options]')
+      .command('send', 'Send a notification', this.setupSendCommand.bind(this))
+      .command('status', 'Check notification status', this.setupStatusCommand.bind(this))
+      .command('template', 'Manage notification templates', this.setupTemplateCommand.bind(this))
+      .option('verbose', {
+        alias: 'v',
+        type: 'boolean',
+        description: 'Enable verbose output'
+      })
+      .option('format', {
+        choices: Object.values(OutputFormat),
+        default: OutputFormat.TABLE,
+        description: 'Output format'
+      })
+      .option('config', {
+        type: 'string',
+        description: 'Path to config file'
+      })
+      .middleware(this.setupGlobalMiddleware.bind(this))
+      .completion('completion', 'Generate shell completion script')
+      .help()
+      .alias('h', 'help')
+      .version()
+      .wrap(yargs.terminalWidth())
+      .argv;
+
+    // Handle unhandled promise rejections
+    process.on('unhandledRejection', this.handleUnhandledRejection.bind(this));
+  }
+
+  /**
+   * Configure the send notification command
+   */
+  private setupSendCommand(yargs: any): any {
+    return yargs
+      .option('template', {
+        alias: 't',
+        type: 'string',
+        description: 'Template ID to use',
+        required: true
+      })
+      .option('recipient', {
+        alias: 'r',
+        type: 'string',
+        description: 'Notification recipient',
+        required: true
+      })
+      .option('channel', {
+        alias: 'c',
+        choices: Object.values(NotificationChannel),
+        description: 'Notification channel',
+        required: true
+      })
+      .option('context', {
+        type: 'string',
+        description: 'JSON context data for template'
+      });
+  }
+
+  /**
+   * Configure the status check command
+   */
+  private setupStatusCommand(yargs: any): any {
+    return yargs
+      .option('id', {
+        type: 'string',
+        description: 'Notification ID to check',
+        required: true
+      })
+      .option('watch', {
+        alias: 'w',
+        type: 'boolean',
+        description: 'Watch for status changes'
+      });
+  }
+
+  /**
+   * Configure the template management command
+   */
+  private setupTemplateCommand(yargs: any): any {
+    return yargs
+      .option('list', {
+        alias: 'l',
+        type: 'boolean',
+        description: 'List all templates'
+      })
+      .option('create', {
+        type: 'boolean',
+        description: 'Create new template'
+      })
+      .option('update', {
+        type: 'boolean',
+        description: 'Update existing template'
+      })
+      .option('delete', {
+        type: 'boolean',
+        description: 'Delete template'
+      })
+      .option('type', {
+        choices: Object.values(NotificationChannel),
+        description: 'Filter by channel type'
+      });
+  }
+
+  /**
+   * Setup global middleware for all commands
+   */
+  private setupGlobalMiddleware(argv: any): void {
+    // Configure output service based on arguments
+    this.outputService.setFormat(argv.format);
+    this.outputService.setVerbose(argv.verbose);
+
+    // Load custom configuration if specified
+    if (argv.config) {
+      try {
+        require(argv.config);
+      } catch (error) {
+        this.outputService.error(
+          'CONFIG_ERROR',
+          `Failed to load config file: ${error.message}`
+        );
+        process.exit(1);
+      }
+    }
+  }
+
+  /**
+   * Register handlers for process signals
+   */
+  private registerSignalHandlers(): void {
+    process.on('SIGINT', () => {
+      this.outputService.info('\nGracefully shutting down...');
+      process.exit(0);
+    });
+
+    process.on('SIGTERM', () => {
+      this.outputService.info('Received SIGTERM, cleaning up...');
+      process.exit(0);
+    });
+  }
+
+  /**
+   * Handle unhandled promise rejections
+   */
+  private handleUnhandledRejection(error: Error): void {
+    this.outputService.error(
+      'UNHANDLED_REJECTION',
+      `Unhandled promise rejection: ${error.message}`
+    );
+    process.exit(1);
+  }
+}
+
+// Execute CLI with proper error handling
+if (require.main === module) {
+  const cli = new NotificationCLI();
+  cli.main().catch((error) => {
+    console.error(chalk.red('Fatal Error:'), error);
+    process.exit(1);
+  });
+}
+
+export default NotificationCLI;
