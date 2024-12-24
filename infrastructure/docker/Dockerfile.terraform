@@ -1,0 +1,90 @@
+# Stage 1: Security Scanner
+FROM aquasec/trivy:latest AS security-scanner
+# Version comment: aquasec/trivy:latest (using latest for most up-to-date security scanning)
+
+# Scan base Terraform image
+RUN trivy image hashicorp/terraform:1.5.0-alpine --no-progress --severity HIGH,CRITICAL \
+    --exit-code 1 --timeout 10m || exit 1
+
+# Stage 2: Base Image
+FROM hashicorp/terraform:1.5.0-alpine AS base
+# Version comment: hashicorp/terraform:1.5.0-alpine
+
+# Install system dependencies with security patches
+RUN apk update && \
+    apk upgrade --no-cache && \
+    apk add --no-cache \
+        bash~=5.2 \
+        curl~=8.1 \
+        jq~=1.6 \
+        python3~=3.11 \
+        py3-pip~=23.1 \
+        git~=2.40 \
+        openssh-client~=9.3 \
+        ca-certificates~=20230506 \
+        tzdata~=2023c && \
+    rm -rf /var/cache/apk/*
+
+# Install AWS CLI v2
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.13.0.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install && \
+    rm -rf aws awscliv2.zip
+
+# Create non-root user for security
+RUN addgroup -g 1000 terraform && \
+    adduser -D -u 1000 -G terraform terraform && \
+    mkdir -p /terraform /home/terraform/.aws && \
+    chown -R terraform:terraform /terraform /home/terraform/.aws
+
+# Stage 3: Final Production Image
+FROM base AS final
+
+# Set environment variables
+ENV TERRAFORM_VERSION=1.5.0 \
+    AWS_CLI_VERSION=2.x \
+    AWS_REGION=us-east-1 \
+    AWS_BACKUP_REGION=us-west-2 \
+    TF_INPUT=0 \
+    TF_IN_AUTOMATION=true \
+    TF_CLI_ARGS_plan="--parallelism=20" \
+    TF_CLI_ARGS_apply="--parallelism=20" \
+    DOCKER_HEALTHCHECK_INTERVAL=30s
+
+# Copy initialization script
+COPY --chown=terraform:terraform infrastructure/scripts/init-terraform.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/init-terraform.sh
+
+# Set working directory
+WORKDIR /terraform
+
+# Switch to non-root user
+USER terraform
+
+# Configure secure permissions
+RUN chmod 700 /home/terraform/.aws && \
+    chmod 600 /home/terraform/.aws/* 2>/dev/null || true
+
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD terraform version >/dev/null && aws sts get-caller-identity >/dev/null || exit 1
+
+# Mount points for Terraform configurations and AWS credentials
+VOLUME ["/terraform", "/home/terraform/.aws"]
+
+# Set entrypoint
+ENTRYPOINT ["/usr/local/bin/init-terraform.sh"]
+
+# Default command (can be overridden)
+CMD ["dev"]
+
+# Labels for container metadata
+LABEL maintainer="Notification Service Team" \
+      version="1.0.0" \
+      description="Production Terraform environment for Notification Service infrastructure" \
+      org.opencontainers.image.source="https://github.com/notification-service" \
+      org.opencontainers.image.vendor="Notification Service" \
+      org.opencontainers.image.version="${TERRAFORM_VERSION}" \
+      org.opencontainers.image.title="Terraform Environment" \
+      org.opencontainers.image.description="Secure containerized Terraform environment for infrastructure management" \
+      security.privileged="false"
