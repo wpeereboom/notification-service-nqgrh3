@@ -1,0 +1,151 @@
+{
+  "templates": {
+    "welcome_email": {
+      "id": "11111111-1111-1111-1111-111111111111",
+      "name": "welcome_email",
+      "type": "email",
+      "version": 1,
+      "content": {
+        "subject": "Welcome to Our Service",
+        "body": {
+          "html": "<!DOCTYPE html><html><body><h1>Welcome {{user.name}}!</h1><p>We're excited to have you join us. Your account has been created with the following preferences:</p><ul><li>Language: {{user.preferences.language}}</li><li>Timezone: {{user.preferences.timezone}}</li></ul><p>Get started by <a href='{{links.dashboard}}'>visiting your dashboard</a>.</p></body></html>",
+          "text": "Welcome {{user.name}}!\n\nWe're excited to have you join us. Your account has been created with the following preferences:\n- Language: {{user.preferences.language}}\n- Timezone: {{user.preferences.timezone}}\n\nGet started by visiting your dashboard: {{links.dashboard}}"
+        },
+        "metadata": {
+          "sender": "notifications@example.com",
+          "reply_to": "support@example.com",
+          "headers": {
+            "X-Priority": "1",
+            "X-Template-Version": "1.0"
+          }
+        }
+      },
+      "active": true,
+      "created_at": "2023-10-01T00:00:00Z",
+      "updated_at": "2023-10-01T00:00:00Z"
+    },
+    "password_reset": {
+      "id": "22222222-2222-2222-2222-222222222222",
+      "name": "password_reset",
+      "type": "email",
+      "version": 2,
+      "content": {
+        "subject": "Password Reset Request",
+        "body": {
+          "html": "<!DOCTYPE html><html><body><h2>Password Reset</h2><p>Hello {{user.name}},</p><p>A password reset was requested for your account. Click the link below to reset your password:</p><p><a href='{{reset.link}}'>Reset Password</a></p><p>This link will expire in {{reset.expiry_minutes}} minutes.</p><p>If you didn't request this, please ignore this email.</p></body></html>",
+          "text": "Password Reset\n\nHello {{user.name}},\n\nA password reset was requested for your account. Click the link below to reset your password:\n\n{{reset.link}}\n\nThis link will expire in {{reset.expiry_minutes}} minutes.\n\nIf you didn't request this, please ignore this email."
+        },
+        "metadata": {
+          "sender": "security@example.com",
+          "reply_to": "no-reply@example.com",
+          "headers": {
+            "X-Priority": "1",
+            "X-Template-Version": "2.0"
+          }
+        }
+      },
+      "active": true,
+      "created_at": "2023-10-01T00:00:00Z",
+      "updated_at": "2023-10-02T00:00:00Z"
+    },
+    "verification_code": {
+      "id": "33333333-3333-3333-3333-333333333333",
+      "name": "verification_code",
+      "type": "sms",
+      "version": 1,
+      "content": {
+        "text": "Your verification code is: {{code}}. Valid for {{expiry_minutes}} minutes. Do not share this code.",
+        "metadata": {
+          "sender": "COMPANY",
+          "max_length": 160,
+          "priority": "high"
+        }
+      },
+      "active": true,
+      "created_at": "2023-10-01T00:00:00Z",
+      "updated_at": "2023-10-01T00:00:00Z"
+    },
+    "new_login_alert": {
+      "id": "44444444-4444-4444-4444-444444444444",
+      "name": "new_login_alert",
+      "type": "push",
+      "version": 1,
+      "content": {
+        "title": "New Login Detected",
+        "body": "New login from {{device.name}} in {{location.city}}",
+        "data": {
+          "action": "open_security_settings",
+          "category": "security_alert"
+        },
+        "metadata": {
+          "priority": "high",
+          "ttl": 3600,
+          "collapse_key": "security_alert"
+        }
+      },
+      "active": true,
+      "created_at": "2023-10-01T00:00:00Z",
+      "updated_at": "2023-10-01T00:00:00Z"
+    },
+    "invalid_template": {
+      "id": "55555555-5555-5555-5555-555555555555",
+      "name": "invalid_template",
+      "type": "unknown",
+      "version": 1,
+      "content": null,
+      "active": false,
+      "created_at": "2023-10-01T00:00:00Z",
+      "updated_at": "2023-10-01T00:00:00Z"
+    },
+    "oversized_sms": {
+      "id": "66666666-6666-6666-6666-666666666666",
+      "name": "oversized_sms",
+      "type": "sms",
+      "version": 1,
+      "content": {
+        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        "metadata": {
+          "sender": "COMPANY"
+        }
+      },
+      "active": false,
+      "created_at": "2023-10-01T00:00:00Z",
+      "updated_at": "2023-10-01T00:00:00Z"
+    },
+    "malformed_variables": {
+      "id": "77777777-7777-7777-7777-777777777777",
+      "name": "malformed_variables",
+      "type": "email",
+      "version": 1,
+      "content": {
+        "subject": "Test Malformed Variables",
+        "body": {
+          "html": "Test with {{unclosed.variable and {{invalid.syntax}} and {{missing.closing}",
+          "text": "Test with {{unclosed.variable and {{invalid.syntax}} and {{missing.closing}"
+        },
+        "metadata": {
+          "sender": "test@example.com"
+        }
+      },
+      "active": false,
+      "created_at": "2023-10-01T00:00:00Z",
+      "updated_at": "2023-10-01T00:00:00Z"
+    },
+    "inactive_template": {
+      "id": "88888888-8888-8888-8888-888888888888",
+      "name": "inactive_template",
+      "type": "push",
+      "version": 1,
+      "content": {
+        "title": "Test Inactive",
+        "body": "This template is inactive",
+        "data": {
+          "action": "none"
+        }
+      },
+      "active": false,
+      "created_at": "2023-10-01T00:00:00Z",
+      "updated_at": "2023-10-01T00:00:00Z"
+    }
+  }
+}
